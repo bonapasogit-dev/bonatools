@@ -43,7 +43,7 @@ npm run test:partukkang
 
 ## 4) Code Standards
 
-- IMPORTANT: Make sure you guys have gone through [tech-labs](https://github.com/bonapasogit-dev//tech-labs) before creating super power internal tools here.
+- IMPORTANT: Make sure you guys have gone through [tech-labs](https://github.com/bonapasogit-dev//tech-labs) before creating super power bonatools here.
 - Use TypeScript with strict typing.
 - Keep public API clear and minimal.
 - Preserve backward compatibility unless intentionally changing major behavior.

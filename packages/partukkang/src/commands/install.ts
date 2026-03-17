@@ -19,7 +19,7 @@ function isInstallType(value: string): value is InstallType {
 export function registerInstallCommand(program: Command): void {
     program
         .command('install')
-        .description('Install internal tools/packages/scripts from bonatools repo')
+        .description('Install bonatools/packages/scripts from bonatools repo')
         .argument('<type>', 'install type: tools | packages | scripts')
         .argument('<thing>', 'item path/name (recommended: copy from `partukkang list <type>` output)')
         .option('--org <org>', 'GitHub organization', 'bonapasogit-dev')

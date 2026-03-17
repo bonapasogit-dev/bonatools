@@ -1,0 +1,62 @@
+{
+    "packageManager": "npm@11.6.2",
+    "name": "bonatools",
+    "author": {
+        "name": "Vicktor Desrony",
+        "email": "vicktodesrony@gmail.com",
+        "url": "https://vldcreation.tech"
+    },
+    "private": true,
+    "workspaces": [
+        "packages/*"
+    ],
+    "scripts": {
+        "build": "npx turbo run build",
+        "test": "npx turbo run test",
+        "dev": "npx turbo run dev --parallel",
+        "clean": "npx turbo run clean",
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix",
+        "format": "prettier . --write",
+        "format:check": "prettier . --check",
+        "build:jwt": "npx turbo run build --filter=@bonapasogit-dev/jwt-manager",
+        "test:jwt": "npx turbo run test --filter=@bonapasogit-dev/jwt-manager",
+        "version:jwt:patch": "npm version patch -w @bonapasogit-dev/jwt-manager --no-git-tag-version",
+        "version:jwt:minor": "npm version minor -w @bonapasogit-dev/jwt-manager --no-git-tag-version",
+        "version:jwt:major": "npm version major -w @bonapasogit-dev/jwt-manager --no-git-tag-version",
+        "publish:jwt": "npm publish -w @bonapasogit-dev/jwt-manager --access public",
+        "release:jwt:patch": "npm run build:jwt && npm run version:jwt:patch && npm run publish:jwt",
+        "release:jwt:minor": "npm run build:jwt && npm run version:jwt:minor && npm run publish:jwt",
+        "release:jwt:major": "npm run build:jwt && npm run version:jwt:major && npm run publish:jwt",
+        "build:responder": "npx turbo run build --filter=@bonapasogit-dev/responder",
+        "test:responder": "npx turbo run test --filter=@bonapasogit-dev/responder",
+        "version:responder:patch": "npm version patch -w @bonapasogit-dev/responder --no-git-tag-version",
+        "version:responder:minor": "npm version minor -w @bonapasogit-dev/responder --no-git-tag-version",
+        "version:responder:major": "npm version major -w @bonapasogit-dev/responder --no-git-tag-version",
+        "publish:responder": "npm publish -w @bonapasogit-dev/responder --access public",
+        "release:responder:patch": "npm run build:responder && npm run version:responder:patch && npm run publish:responder",
+        "release:responder:minor": "npm run build:responder && npm run version:responder:minor && npm run publish:responder",
+        "release:responder:major": "npm run build:responder && npm run version:responder:major && npm run publish:responder",
+        "build:partukkang": "npx turbo run build --filter=@bonapasogit-dev/partukkang",
+        "test:partukkang": "npx turbo run test --filter=@bonapasogit-dev/partukkang",
+        "version:partukkang:patch": "npm version patch -w @bonapasogit-dev/partukkang --no-git-tag-version",
+        "version:partukkang:minor": "npm version minor -w @bonapasogit-dev/partukkang --no-git-tag-version",
+        "version:partukkang:major": "npm version major -w @bonapasogit-dev/partukkang --no-git-tag-version",
+        "publish:partukkang": "npm publish -w @bonapasogit-dev/partukkang --access public",
+        "release:partukkang:patch": "npm run build:partukkang && npm run version:partukkang:patch && npm run publish:partukkang",
+        "release:partukkang:minor": "npm run build:partukkang && npm run version:partukkang:minor && npm run publish:partukkang",
+        "release:partukkang:major": "npm run build:partukkang && npm run version:partukkang:major && npm run publish:partukkang",
+        "partukkang": "node ./packages/partukkang/dist/index.js",
+        "partukkang:link": "npm run build:partukkang && npm link --workspace=@bonapasogit-dev/partukkang",
+        "partukkang:install:global": "npm run build:partukkang && npm i -g ./packages/partukkang",
+        "partukkang:unlink": "npm unlink -g @bonapasogit-dev/partukkang"
+    },
+    "devDependencies": {
+        "@eslint/js": "^9.22.0",
+        "eslint": "^9.22.0",
+        "globals": "^16.0.0",
+        "prettier": "^3.5.3",
+        "turbo": "^2.3.0",
+        "typescript-eslint": "^8.26.0"
+    }
+}

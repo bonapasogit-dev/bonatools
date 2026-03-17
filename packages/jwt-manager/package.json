@@ -1,0 +1,42 @@
+{
+    "name": "@bonapasogit-dev/jwt-manager",
+    "version": "1.0.0",
+    "description": "High-performance JWT lifecycle management with JTI validation",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/bonapasogit-dev/bonatools.git"
+    },
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "npx tsc",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "prepublishOnly": "npm run build"
+    },
+    "keywords": [
+        "jwt",
+        "jti",
+        "token",
+        "authentication",
+        "security"
+    ],
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "jsonwebtoken": "^9.0.2",
+        "ulid": "^2.3.0"
+    },
+    "devDependencies": {
+        "@types/jsonwebtoken": "^9.0.6",
+        "@types/node": "^20.11.0",
+        "typescript": "^5.3.3",
+        "vitest": "^1.2.0"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}

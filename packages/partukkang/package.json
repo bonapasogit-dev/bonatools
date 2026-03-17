@@ -1,0 +1,43 @@
+{
+    "name": "@bonapasogit-dev/partukkang",
+    "version": "1.0.0",
+    "description": "Partukkang internal CLI to manage tools, packages, and developer configuration",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/bonapasogit-dev/bonatools.git"
+    },
+    "bin": {
+        "partukkang": "dist/index.js"
+    },
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "npx tsc",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "prepublishOnly": "npm run build"
+    },
+    "keywords": [
+        "cli",
+        "partukkang",
+        "bonatools",
+        "typescript"
+    ],
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "commander": "^12.1.0",
+        "yaml": "^2.5.1"
+    },
+    "devDependencies": {
+        "@types/node": "^20.11.0",
+        "typescript": "^5.3.3",
+        "vitest": "^1.2.0"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}

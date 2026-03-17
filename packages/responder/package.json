@@ -1,0 +1,36 @@
+{
+    "name": "@bonapasogit-dev/responder",
+    "version": "1.0.0",
+    "description": "Standardized API response builder and handler utilities",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/bonapasogit-dev/bonatools.git"
+    },
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "npx tsc",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "prepublishOnly": "npm run build"
+    },
+    "keywords": [
+        "response",
+        "api",
+        "express",
+        "typescript"
+    ],
+    "author": "",
+    "license": "MIT",
+    "devDependencies": {
+        "@types/node": "^20.11.0",
+        "typescript": "^5.3.3",
+        "vitest": "^1.2.0"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}

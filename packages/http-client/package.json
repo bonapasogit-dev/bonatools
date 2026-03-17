@@ -1,0 +1,11 @@
+{
+    "name": "@bonapasogit-dev/http-client",
+    "version": "0.0.1",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "echo \"no build yet\"",
+        "test": "echo \"no tests yet\"",
+        "clean": "rimraf dist"
+    }
+}

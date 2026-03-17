@@ -1,6 +1,6 @@
 # bonatools Monorepo
 
-Welcome to: bonatools. not just about bonatools, i called it Super power bonatools. which has gone through a solid foundation, why is it solid? Because it comes from our [tech-labs](https://github.com/bonapasogit-dev//tech-labs).
+Welcome to: bonatools. not just about bonatools, i called it Super power bonatools. which has gone through a solid foundation, why solid? It's clean, it's intuitive. 
 
 Why [Monorepo](https://monorepo.tools/#why-a-monorepo) ? We have a mission to centralize code management, improve collaboration, and ensure consistency at massive scale. Single source of truth ? Let's goo!
 

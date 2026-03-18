@@ -8,7 +8,7 @@ class ErrorNormalizer {
 
         return error.details.map((detail) => ({
             field: detail.path.join('.'),
-            error: detail.message.replace(/"/g, ''),
+            issue: detail.message.replace(/"/g, ''),
         }));
     }
 
@@ -19,12 +19,12 @@ class ErrorNormalizer {
 
         return errors.map((entry) => ({
             field: entry.param,
-            error: entry.msg,
+            issue: entry.msg,
         }));
     }
 
-    static fromCustom(field: string, error: string): NormalizedError[] {
-        return [{ field, error }];
+    static fromCustom(field: string, issue: string): NormalizedError[] {
+        return [{ field, issue }];
     }
 }
 

@@ -12,34 +12,75 @@ import {
 class ResponseHandler {
     static success(res: MinimalResponse, options: HandlerBaseOptions = {}): unknown {
         const {
-            data = [],
+            data = null,
             message = ResponseMessages.SUCCESS,
-            responseCode = ResponseCodes.PAYLOAD.SUCCESS.toString(),
-            ...extras
+            meta = {},
         } = options;
+
         return res.status(ResponseCodes.SUCCESS).json(
             ResponseBuilder.success({
                 message,
                 data,
-                responseCode,
-                ...extras,
+                meta,
             }),
         );
     }
 
     static created(res: MinimalResponse, options: HandlerBaseOptions = {}): unknown {
         const {
-            data = [],
+            data = null,
             message = ResponseMessages.CREATED,
-            responseCode = ResponseCodes.PAYLOAD.CREATED.toString(),
-            ...extras
+            meta = {},
         } = options;
+
         return res.status(ResponseCodes.CREATED).json(
             ResponseBuilder.success({
                 message,
                 data,
-                responseCode,
-                ...extras,
+                meta,
+            }),
+        );
+    }
+
+    static noContent(res: MinimalResponse): unknown {
+        const response = res.status(ResponseCodes.NO_CONTENT);
+
+        if (typeof response.end === 'function') {
+            return response.end();
+        }
+
+        if (typeof response.send === 'function') {
+            return response.send();
+        }
+
+        return response.json(
+            ResponseBuilder.success({
+                message: ResponseMessages.NO_CONTENT,
+                data: null,
+            }),
+        );
+    }
+
+    static badRequest(res: MinimalResponse, options: HandlerValidationOptions = {}): unknown {
+        const {
+            message = ResponseMessages.BAD_REQUEST,
+            code = 'BAD_REQUEST',
+            data = null,
+            details = [],
+            traceId,
+            meta = {},
+            error = {},
+        } = options;
+
+        return res.status(ResponseCodes.BAD_REQUEST).json(
+            ResponseBuilder.error({
+                message,
+                code,
+                data,
+                details,
+                traceId,
+                meta,
+                error,
             }),
         );
     }
@@ -47,33 +88,57 @@ class ResponseHandler {
     static notFound(res: MinimalResponse, options: HandlerBaseOptions = {}): unknown {
         const {
             message = ResponseMessages.NOT_FOUND,
-            data = [],
-            responseCode = ResponseCodes.PAYLOAD.NOT_FOUND.toString(),
-            ...extras
+            data = null,
+            meta = {},
         } = options;
+
         return res.status(ResponseCodes.NOT_FOUND).json(
             ResponseBuilder.error({
                 message,
+                code: 'NOT_FOUND',
                 data,
-                responseCode,
-                ...extras,
+                meta,
+            }),
+        );
+    }
+
+    static conflict(res: MinimalResponse, options: HandlerBaseOptions = {}): unknown {
+        const {
+            message = ResponseMessages.CONFLICT,
+            data = null,
+            meta = {},
+        } = options;
+
+        return res.status(ResponseCodes.CONFLICT).json(
+            ResponseBuilder.error({
+                message,
+                code: 'CONFLICT',
+                data,
+                meta,
             }),
         );
     }
 
     static validationError(res: MinimalResponse, options: HandlerValidationOptions = {}): unknown {
         const {
-            errors = [],
+            details = [],
             message = ResponseMessages.VALIDATION_ERROR,
-            responseCode = ResponseCodes.PAYLOAD.BAD_REQUEST.toString(),
-            ...extras
+            code = 'VALIDATION_FAILED',
+            data = null,
+            traceId,
+            meta = {},
+            error = {},
         } = options;
+
         return res.status(ResponseCodes.BAD_REQUEST).json(
             ResponseBuilder.validation({
                 message,
-                errors,
-                responseCode,
-                ...extras,
+                code,
+                data,
+                details,
+                traceId,
+                meta,
+                error,
             }),
         );
     }
@@ -81,16 +146,16 @@ class ResponseHandler {
     static unauthorized(res: MinimalResponse, options: HandlerBaseOptions = {}): unknown {
         const {
             message = ResponseMessages.UNAUTHORIZED,
-            data = [],
-            responseCode = ResponseCodes.PAYLOAD.UNAUTHORIZED.toString(),
-            ...extras
+            data = null,
+            meta = {},
         } = options;
+
         return res.status(ResponseCodes.UNAUTHORIZED).json(
             ResponseBuilder.error({
                 message,
+                code: 'UNAUTHORIZED',
                 data,
-                responseCode,
-                ...extras,
+                meta,
             }),
         );
     }
@@ -98,38 +163,49 @@ class ResponseHandler {
     static forbidden(res: MinimalResponse, options: HandlerBaseOptions = {}): unknown {
         const {
             message = ResponseMessages.FORBIDDEN,
-            data = [],
-            responseCode = ResponseCodes.PAYLOAD.FORBIDDEN.toString(),
-            ...extras
+            data = null,
+            meta = {},
         } = options;
+
         return res.status(ResponseCodes.FORBIDDEN).json(
             ResponseBuilder.error({
                 message,
+                code: 'FORBIDDEN',
                 data,
-                responseCode,
-                ...extras,
+                meta,
             }),
         );
+    }
+
+    static internalError(res: MinimalResponse, options: HandlerErrorOptions = {}): unknown {
+        return ResponseHandler.error(res, options);
     }
 
     static error(res: MinimalResponse, options: HandlerErrorOptions = {}): unknown {
         const {
             message = ResponseMessages.INTERNAL_ERROR,
+            code = 'INTERNAL_ERROR',
             error = null,
-            data = [],
-            responseCode = ResponseCodes.PAYLOAD.INTERNAL_ERROR.toString(),
-            ...extras
+            data = null,
+            details = [],
+            traceId,
+            meta = {},
+            errorPayload = {},
         } = options;
 
         if (error) {
             console.error(error);
         }
+
         return res.status(ResponseCodes.INTERNAL_ERROR).json(
             ResponseBuilder.error({
                 message,
+                code,
                 data,
-                responseCode,
-                ...extras,
+                details,
+                traceId,
+                meta,
+                error: errorPayload,
             }),
         );
     }

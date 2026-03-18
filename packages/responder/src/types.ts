@@ -1,59 +1,84 @@
-export type ResponseData = unknown[];
+export type ApiMeta = Record<string, unknown>;
 
-export interface BaseResponse {
-    responseCode: string;
-    status: boolean;
+export interface ApiErrorDetail {
+    field?: string;
+    issue: string;
+    [key: string]: unknown;
+}
+
+export interface ApiErrorObject {
+    code?: string;
     message: string;
-    data: ResponseData;
+    details?: ApiErrorDetail[];
+    traceId?: string;
     [key: string]: unknown;
 }
 
-export interface BuilderSuccessOptions {
-    message?: string;
-    data?: ResponseData;
-    responseCode?: string;
-    [key: string]: unknown;
+export interface ApiResponse<TData = unknown> {
+    message: string;
+    data: TData | null;
+    meta: ApiMeta;
+    error: ApiErrorObject | null;
 }
 
-export interface BuilderErrorOptions {
+export interface BuilderSuccessOptions<TData = unknown> {
     message?: string;
-    data?: ResponseData;
-    responseCode?: string;
-    [key: string]: unknown;
+    data?: TData | null;
+    meta?: Record<string, unknown>;
 }
 
-export interface BuilderValidationOptions {
+export interface BuilderErrorOptions<TData = unknown> {
     message?: string;
-    errors?: ResponseData;
-    responseCode?: string;
-    [key: string]: unknown;
+    code?: string;
+    data?: TData | null;
+    details?: ApiErrorDetail[];
+    traceId?: string;
+    meta?: Record<string, unknown>;
+    error?: Record<string, unknown>;
+}
+
+export interface BuilderValidationOptions<TData = unknown> {
+    message?: string;
+    code?: string;
+    data?: TData | null;
+    details?: ApiErrorDetail[];
+    traceId?: string;
+    meta?: Record<string, unknown>;
+    error?: Record<string, unknown>;
 }
 
 export interface MinimalResponse {
     status: (statusCode: number) => MinimalResponse;
     json: (payload: unknown) => unknown;
+    send?: (payload?: unknown) => unknown;
+    end?: () => unknown;
 }
 
-export interface HandlerBaseOptions {
+export interface HandlerBaseOptions<TData = unknown> {
     message?: string;
-    data?: ResponseData;
-    responseCode?: string;
-    [key: string]: unknown;
+    data?: TData | null;
+    meta?: Record<string, unknown>;
 }
 
-export interface HandlerValidationOptions {
+export interface HandlerValidationOptions<TData = unknown> {
     message?: string;
-    errors?: ResponseData;
-    responseCode?: string;
-    [key: string]: unknown;
+    code?: string;
+    data?: TData | null;
+    details?: ApiErrorDetail[];
+    traceId?: string;
+    meta?: Record<string, unknown>;
+    error?: Record<string, unknown>;
 }
 
-export interface HandlerErrorOptions {
+export interface HandlerErrorOptions<TData = unknown> {
     message?: string;
+    code?: string;
     error?: unknown;
-    data?: ResponseData;
-    responseCode?: string;
-    [key: string]: unknown;
+    data?: TData | null;
+    details?: ApiErrorDetail[];
+    traceId?: string;
+    meta?: Record<string, unknown>;
+    errorPayload?: Record<string, unknown>;
 }
 
 export interface HandlerForwardOptions {
@@ -63,7 +88,7 @@ export interface HandlerForwardOptions {
 
 export interface NormalizedError {
     field: string;
-    error: string;
+    issue: string;
 }
 
 export interface JoiDetail {
@@ -92,7 +117,8 @@ export interface MiddlewareResponseLike {
     status?: (statusCode: number) => unknown;
     code?: (statusCode: number) => unknown;
     json?: (payload: unknown) => unknown;
-    send?: (payload: unknown) => unknown;
+    send?: (payload?: unknown) => unknown;
+    end?: () => unknown;
     [key: string]: unknown;
 }
 
@@ -101,10 +127,14 @@ export type MiddlewareNext = () => unknown;
 export interface ResponderMethods {
     success: (options?: HandlerBaseOptions) => unknown;
     created: (options?: HandlerBaseOptions) => unknown;
+    noContent: () => unknown;
+    badRequest: (options?: HandlerValidationOptions) => unknown;
     notFound: (options?: HandlerBaseOptions) => unknown;
+    conflict: (options?: HandlerBaseOptions) => unknown;
     validationError: (options?: HandlerValidationOptions) => unknown;
     unauthorized: (options?: HandlerBaseOptions) => unknown;
     forbidden: (options?: HandlerBaseOptions) => unknown;
+    internalError: (options?: HandlerErrorOptions) => unknown;
     error: (options?: HandlerErrorOptions) => unknown;
     forward: (options: HandlerForwardOptions) => unknown;
 }

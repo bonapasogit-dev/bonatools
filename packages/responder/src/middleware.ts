@@ -50,105 +50,198 @@ function respond(response: MiddlewareResponseLike, statusCode: number, payload: 
     return sendPayload(withUpdatedStatus, payload);
 }
 
+function respondNoContent(response: MiddlewareResponseLike): unknown {
+    const withUpdatedStatus = withStatus(response, ResponseCodes.NO_CONTENT);
+
+    if (typeof withUpdatedStatus.end === 'function') {
+        return withUpdatedStatus.end();
+    }
+
+    if (typeof withUpdatedStatus.send === 'function') {
+        return withUpdatedStatus.send();
+    }
+
+    return sendPayload(
+        withUpdatedStatus,
+        ResponseBuilder.success({
+            message: ResponseMessages.NO_CONTENT,
+            data: null,
+        }),
+    );
+}
+
 function createResponderMethods(response: MiddlewareResponseLike): ResponderMethods {
     return {
         success(options: HandlerBaseOptions = {}): unknown {
             const {
-                data = [],
+                data = null,
                 message = ResponseMessages.SUCCESS,
-                responseCode = ResponseCodes.PAYLOAD.SUCCESS.toString(),
-                ...extras
+                meta = {},
             } = options;
 
             return respond(
                 response,
                 ResponseCodes.SUCCESS,
-                ResponseBuilder.success({ message, data, responseCode, ...extras }),
+                ResponseBuilder.success({ message, data, meta }),
             );
         },
 
         created(options: HandlerBaseOptions = {}): unknown {
             const {
-                data = [],
+                data = null,
                 message = ResponseMessages.CREATED,
-                responseCode = ResponseCodes.PAYLOAD.CREATED.toString(),
-                ...extras
+                meta = {},
             } = options;
 
             return respond(
                 response,
                 ResponseCodes.CREATED,
-                ResponseBuilder.success({ message, data, responseCode, ...extras }),
+                ResponseBuilder.success({ message, data, meta }),
             );
         },
 
-        notFound(options: HandlerBaseOptions = {}): unknown {
-            const {
-                data = [],
-                message = ResponseMessages.NOT_FOUND,
-                responseCode = ResponseCodes.PAYLOAD.NOT_FOUND.toString(),
-                ...extras
-            } = options;
-
-            return respond(
-                response,
-                ResponseCodes.NOT_FOUND,
-                ResponseBuilder.error({ message, data, responseCode, ...extras }),
-            );
+        noContent(): unknown {
+            return respondNoContent(response);
         },
 
-        validationError(options: HandlerValidationOptions = {}): unknown {
+        badRequest(options: HandlerValidationOptions = {}): unknown {
             const {
-                errors = [],
-                message = ResponseMessages.VALIDATION_ERROR,
-                responseCode = ResponseCodes.PAYLOAD.BAD_REQUEST.toString(),
-                ...extras
+                message = ResponseMessages.BAD_REQUEST,
+                code = 'BAD_REQUEST',
+                data = null,
+                details = [],
+                traceId,
+                meta = {},
+                error = {},
             } = options;
 
             return respond(
                 response,
                 ResponseCodes.BAD_REQUEST,
-                ResponseBuilder.validation({ message, errors, responseCode, ...extras }),
+                ResponseBuilder.error({
+                    message,
+                    code,
+                    data,
+                    details,
+                    traceId,
+                    meta,
+                    error,
+                }),
+            );
+        },
+
+        notFound(options: HandlerBaseOptions = {}): unknown {
+            const {
+                data = null,
+                message = ResponseMessages.NOT_FOUND,
+                meta = {},
+            } = options;
+
+            return respond(
+                response,
+                ResponseCodes.NOT_FOUND,
+                ResponseBuilder.error({
+                    message,
+                    code: 'NOT_FOUND',
+                    data,
+                    meta,
+                }),
+            );
+        },
+
+        conflict(options: HandlerBaseOptions = {}): unknown {
+            const {
+                data = null,
+                message = ResponseMessages.CONFLICT,
+                meta = {},
+            } = options;
+
+            return respond(
+                response,
+                ResponseCodes.CONFLICT,
+                ResponseBuilder.error({
+                    message,
+                    code: 'CONFLICT',
+                    data,
+                    meta,
+                }),
+            );
+        },
+
+        validationError(options: HandlerValidationOptions = {}): unknown {
+            const {
+                details = [],
+                message = ResponseMessages.VALIDATION_ERROR,
+                code = 'VALIDATION_FAILED',
+                data = null,
+                traceId,
+                meta = {},
+                error = {},
+            } = options;
+
+            return respond(
+                response,
+                ResponseCodes.BAD_REQUEST,
+                ResponseBuilder.validation({
+                    message,
+                    code,
+                    data,
+                    details,
+                    traceId,
+                    meta,
+                    error,
+                }),
             );
         },
 
         unauthorized(options: HandlerBaseOptions = {}): unknown {
             const {
-                data = [],
+                data = null,
                 message = ResponseMessages.UNAUTHORIZED,
-                responseCode = ResponseCodes.PAYLOAD.UNAUTHORIZED.toString(),
-                ...extras
+                meta = {},
             } = options;
 
             return respond(
                 response,
                 ResponseCodes.UNAUTHORIZED,
-                ResponseBuilder.error({ message, data, responseCode, ...extras }),
+                ResponseBuilder.error({
+                    message,
+                    code: 'UNAUTHORIZED',
+                    data,
+                    meta,
+                }),
             );
         },
 
         forbidden(options: HandlerBaseOptions = {}): unknown {
             const {
-                data = [],
+                data = null,
                 message = ResponseMessages.FORBIDDEN,
-                responseCode = ResponseCodes.PAYLOAD.FORBIDDEN.toString(),
-                ...extras
+                meta = {},
             } = options;
 
             return respond(
                 response,
                 ResponseCodes.FORBIDDEN,
-                ResponseBuilder.error({ message, data, responseCode, ...extras }),
+                ResponseBuilder.error({
+                    message,
+                    code: 'FORBIDDEN',
+                    data,
+                    meta,
+                }),
             );
         },
 
-        error(options: HandlerErrorOptions = {}): unknown {
+        internalError(options: HandlerErrorOptions = {}): unknown {
             const {
-                data = [],
+                data = null,
                 message = ResponseMessages.INTERNAL_ERROR,
+                code = 'INTERNAL_ERROR',
                 error = null,
-                responseCode = ResponseCodes.PAYLOAD.INTERNAL_ERROR.toString(),
-                ...extras
+                details = [],
+                traceId,
+                meta = {},
+                errorPayload = {},
             } = options;
 
             if (error) {
@@ -158,7 +251,46 @@ function createResponderMethods(response: MiddlewareResponseLike): ResponderMeth
             return respond(
                 response,
                 ResponseCodes.INTERNAL_ERROR,
-                ResponseBuilder.error({ message, data, responseCode, ...extras }),
+                ResponseBuilder.error({
+                    message,
+                    code,
+                    data,
+                    details,
+                    traceId,
+                    meta,
+                    error: errorPayload,
+                }),
+            );
+        },
+
+        error(options: HandlerErrorOptions = {}): unknown {
+            const {
+                data = null,
+                message = ResponseMessages.INTERNAL_ERROR,
+                code = 'INTERNAL_ERROR',
+                error = null,
+                details = [],
+                traceId,
+                meta = {},
+                errorPayload = {},
+            } = options;
+
+            if (error) {
+                console.error(error);
+            }
+
+            return respond(
+                response,
+                ResponseCodes.INTERNAL_ERROR,
+                ResponseBuilder.error({
+                    message,
+                    code,
+                    data,
+                    details,
+                    traceId,
+                    meta,
+                    error: errorPayload,
+                }),
             );
         },
 

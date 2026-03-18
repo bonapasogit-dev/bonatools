@@ -11,23 +11,28 @@ describe('ResponseBuilder', () => {
     it('builds success response', () => {
         const payload = ResponseBuilder.success({
             message: 'ok',
-            data: [{ id: 1 }],
-            traceId: 't-1',
+            data: { id: 1 },
+            meta: { traceId: 't-1' },
         });
 
-        expect(payload.status).toBe(true);
         expect(payload.message).toBe('ok');
-        expect(payload.responseCode).toBe(ResponseCodes.PAYLOAD.SUCCESS.toString());
-        expect(payload).toMatchObject({ traceId: 't-1' });
+        expect(payload.data).toEqual({ id: 1 });
+        expect(payload.meta).toEqual({ traceId: 't-1' });
+        expect(payload.error).toBeNull();
     });
 
     it('builds validation response', () => {
         const payload = ResponseBuilder.validation({
-            errors: [{ field: 'name', error: 'required' }],
+            details: [{ field: 'name', issue: 'required' }],
         });
 
-        expect(payload.status).toBe(false);
-        expect(payload.data).toEqual([{ field: 'name', error: 'required' }]);
+        expect(payload.data).toBeNull();
+        expect(payload.message).toBe('Validation Error');
+        expect(payload.error).toEqual({
+            code: 'VALIDATION_FAILED',
+            message: 'Validation Error',
+            details: [{ field: 'name', issue: 'required' }],
+        });
     });
 });
 
@@ -41,11 +46,25 @@ describe('ResponseHandler', () => {
 
     it('uses success status and payload', () => {
         const res = createMockRes();
-        const result = ResponseHandler.success(res, { data: [{ ok: true }] });
+        const result = ResponseHandler.success(res, { data: { ok: true } });
 
         expect(res.status).toHaveBeenCalledWith(ResponseCodes.SUCCESS);
         expect(res.json).toHaveBeenCalledTimes(1);
+        expect(res.json).toHaveBeenCalledWith({
+            message: 'Success',
+            data: { ok: true },
+            meta: {},
+            error: null,
+        });
         expect(result).toBe('done');
+    });
+
+    it('uses created status code 201', () => {
+        const res = createMockRes();
+
+        ResponseHandler.created(res, { data: { id: 'u-1' } });
+
+        expect(res.status).toHaveBeenCalledWith(ResponseCodes.CREATED);
     });
 
     it('logs error and returns internal error payload', () => {
@@ -66,7 +85,7 @@ describe('ErrorNormalizer', () => {
             details: [{ path: ['user', 'name'], message: '"name" is required' }],
         });
 
-        expect(result).toEqual([{ field: 'user.name', error: 'name is required' }]);
+        expect(result).toEqual([{ field: 'user.name', issue: 'name is required' }]);
     });
 
     it('normalizes express-validator errors', () => {
@@ -74,7 +93,7 @@ describe('ErrorNormalizer', () => {
             { param: 'email', msg: 'invalid email' },
         ]);
 
-        expect(result).toEqual([{ field: 'email', error: 'invalid email' }]);
+        expect(result).toEqual([{ field: 'email', issue: 'invalid email' }]);
     });
 });
 
@@ -93,7 +112,7 @@ describe('ResponseMiddleware', () => {
         expect(typeof res.success).toBe('function');
 
         const result = res.success?.({
-            data: [{ id: 'a' }],
+            data: { id: 'a' },
         });
 
         expect(result).toBe('ok');
@@ -118,5 +137,20 @@ describe('ResponseMiddleware', () => {
         expect(result).toBe('sent');
         expect(reply.code).toHaveBeenCalledWith(ResponseCodes.NOT_FOUND);
         expect(reply.send).toHaveBeenCalledTimes(1);
+    });
+
+    it('sends no-content status with empty body', () => {
+        const reply: MiddlewareResponseLike & Partial<ResponderMethods> = {
+            code: vi.fn().mockReturnThis(),
+            send: vi.fn().mockReturnValue('empty'),
+        };
+
+        ResponseMiddleware.attach(reply);
+
+        const result = reply.noContent?.();
+
+        expect(result).toBe('empty');
+        expect(reply.code).toHaveBeenCalledWith(ResponseCodes.NO_CONTENT);
+        expect(reply.send).toHaveBeenCalledWith();
     });
 });

@@ -1,7 +1,6 @@
 import ResponseMessages from './messages';
-import ResponseCodes from './codes';
 import {
-    BaseResponse,
+    ApiResponse,
     BuilderErrorOptions,
     BuilderSuccessOptions,
     BuilderValidationOptions,
@@ -10,46 +9,57 @@ import {
 class ResponseBuilder {
     static success({
         message = ResponseMessages.SUCCESS,
-        data = [],
-        responseCode = ResponseCodes.PAYLOAD.SUCCESS.toString(),
-        ...extras
-    }: BuilderSuccessOptions = {}): Readonly<BaseResponse> {
+        data = null,
+        meta = {},
+    }: BuilderSuccessOptions = {}): Readonly<ApiResponse> {
         return Object.freeze({
-            responseCode,
-            status: true,
             message,
             data,
-            ...extras,
+            meta,
+            error: null,
         });
     }
 
     static error({
         message = ResponseMessages.INTERNAL_ERROR,
-        data = [],
-        responseCode = ResponseCodes.PAYLOAD.INTERNAL_ERROR.toString(),
-        ...extras
-    }: BuilderErrorOptions = {}): Readonly<BaseResponse> {
+        code = 'INTERNAL_ERROR',
+        data = null,
+        details = [],
+        traceId,
+        meta = {},
+        error = {},
+    }: BuilderErrorOptions = {}): Readonly<ApiResponse> {
         return Object.freeze({
-            responseCode,
-            status: false,
             message,
             data,
-            ...extras,
+            meta,
+            error: {
+                ...error,
+                code,
+                message,
+                details,
+                ...(typeof traceId === 'string' ? { traceId } : {}),
+            },
         });
     }
 
     static validation({
         message = ResponseMessages.VALIDATION_ERROR,
-        errors = [],
-        responseCode = ResponseCodes.PAYLOAD.BAD_REQUEST.toString(),
-        ...extras
-    }: BuilderValidationOptions = {}): Readonly<BaseResponse> {
-        return Object.freeze({
-            responseCode,
-            status: false,
+        code = 'VALIDATION_FAILED',
+        data = null,
+        details = [],
+        traceId,
+        meta = {},
+        error = {},
+    }: BuilderValidationOptions = {}): Readonly<ApiResponse> {
+        return ResponseBuilder.error({
             message,
-            data: errors,
-            ...extras,
+            code,
+            data,
+            details,
+            traceId,
+            meta,
+            error,
         });
     }
 

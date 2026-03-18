@@ -34,3 +34,7 @@ Thumbs.db
 
 # config files
 *partukkang.config.yaml
+
+# dev
+.agent
+.agents

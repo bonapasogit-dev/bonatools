@@ -6,8 +6,10 @@
     "types": "dist/index.d.ts",
     "repository": {
         "type": "git",
-        "url": "https://github.com/bonapasogit-dev/bonatools.git"
+        "url": "git+https://github.com/bonapasogit-dev/bonatools.git",
+        "directory": "packages/responder"
     },
+    "homepage": "https://github.com/bonapasogit-dev/bonatools/tree/main/packages/responder#readme",
     "files": [
         "dist"
     ],

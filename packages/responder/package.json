@@ -1,6 +1,6 @@
 {
     "name": "@bonapasogit-dev/responder",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Standardized API response builder and handler utilities",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",

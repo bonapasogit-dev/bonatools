@@ -177,9 +177,15 @@ export interface HttpClientOptions {
   logResponseBody?: boolean;
   /** Maximum length of logged response bodies (default: 2000) */
   maxLogBodyLength?: number;
-  /** Maximum concurrent connections (default: 100) */
+  /**
+   * @deprecated This option is not used. Configure maximum concurrent connections via `transport.undici.connections`.
+   * @see HttpTransportOptions
+   */
   maxConnections?: number;
-  /** HTTP pipelining depth (default: 1) */
+  /**
+   * @deprecated This option is not used. Configure HTTP pipelining depth via `transport.undici.pipelining`.
+   * @see HttpTransportOptions
+   */
   pipelining?: number;
   /** Backoff strategy configuration */
   backoff?: BackoffConfig;

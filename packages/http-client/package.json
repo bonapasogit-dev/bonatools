@@ -14,7 +14,17 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "browser": {
+        "import": "./dist/index.js"
+      },
       "import": "./dist/index.js"
+    },
+    "./transports": {
+      "types": "./dist/transports/index.d.ts",
+      "browser": {
+        "import": "./dist/transports/browser.js"
+      },
+      "import": "./dist/transports/index.js"
     }
   },
   "scripts": {

@@ -56,7 +56,7 @@ export function computeBackoff(
 ): number {
   const exponential = baseMs * Math.pow(2, attempt);
   const capped = Math.min(exponential, maxMs);
-  // Apply jitter: random between 50% and 100% of capped value
+  // Apply jitter: random between 50% and 150% of capped value (±50%)
   return capped * (0.5 + Math.random());
 }
 

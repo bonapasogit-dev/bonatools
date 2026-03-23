@@ -366,11 +366,13 @@ export class HttpClient {
   ): Promise<{ response: HttpSuccess<T>; statusCode: number }> {
     const controller = new AbortController();
     let timeoutHandle: NodeJS.Timeout | null = null;
+    let didTimeout = false;
 
     try {
       // Set request timeout
       if (timeoutMs && timeoutMs > 0) {
         timeoutHandle = setTimeout(() => {
+          didTimeout = true;
           controller.abort();
         }, timeoutMs);
       }
@@ -432,7 +434,7 @@ export class HttpClient {
         const message = error.message.toLowerCase();
 
         if (message.includes('abort')) {
-          if (timeoutHandle) {
+          if (didTimeout) {
             throw new TimeoutError(timeoutMs ?? 0);
           }
           throw new AbortError();
@@ -442,7 +444,7 @@ export class HttpClient {
       }
 
       if (this.isAbortLikeError(error)) {
-        if (timeoutHandle) {
+        if (didTimeout) {
           throw new TimeoutError(timeoutMs ?? 0);
         }
         throw new AbortError();
@@ -578,13 +580,21 @@ export class HttpClient {
       return true;
     }
 
-    // OPEN state: check timeout
-    if (now - this.circuitBreaker.openedAt >= this.circuitBreaker.openTimeoutMs) {
-      // HALF_OPEN: allow some requests probabilistically
+    // OPEN state: reject until timeout elapses, then transition to HALF_OPEN.
+    if (this.circuitBreaker.state === 'OPEN') {
+      if (now - this.circuitBreaker.openedAt < this.circuitBreaker.openTimeoutMs) {
+        return false;
+      }
+
+      this.circuitBreaker.state = 'HALF_OPEN';
+    }
+
+    // HALF_OPEN state: allow some requests probabilistically.
+    if (this.circuitBreaker.state === 'HALF_OPEN') {
       return Math.random() < this.circuitBreaker.halfOpenSuccessRate;
     }
 
-    // Still OPEN: reject
+    // Fallback: reject for unexpected state.
     return false;
   }
 
@@ -615,6 +625,14 @@ export class HttpClient {
     }
 
     if (error instanceof HttpError && error.status < 500) {
+      return;
+    }
+
+    // Any probe failure while HALF_OPEN immediately reopens circuit.
+    if (this.circuitBreaker.state === 'HALF_OPEN') {
+      this.circuitBreaker.state = 'OPEN';
+      this.circuitBreaker.openedAt = Date.now();
+      this.circuitBreaker.failures = this.circuitBreaker.failureThreshold;
       return;
     }
 

@@ -216,9 +216,9 @@ async function executeLoad({
         } else {
           success += 1;
         }
-      } catch {
+      } catch (err) {
         fail += 1;
-        const key = classifyErrorKey(arguments[0]);
+        const key = classifyErrorKey(err);
         errorBreakdown[key] = (errorBreakdown[key] ?? 0) + 1;
       } finally {
         if (collectLatencies) {

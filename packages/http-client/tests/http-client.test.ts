@@ -669,12 +669,40 @@ describe('HttpClient', () => {
       },
     });
   });
+
+  it('should classify abort-like errors as AbortError when timeout did not fire', async () => {
+    vi.spyOn(global, 'fetch').mockRejectedValue(
+      new TypeError('aborted by upstream')
+    );
+
+    await expectAsync(() => client.get('/users/1')).rejects.toThrow(AbortError);
+  });
+
+  it('should classify abort caused by timeout as TimeoutError', async () => {
+    vi.spyOn(global, 'fetch').mockImplementation(
+      (_input: RequestInfo | URL, init?: RequestInit) => {
+        return new Promise((_resolve, reject) => {
+          if (init?.signal) {
+            init.signal.addEventListener('abort', () => {
+              reject(new TypeError('aborted'));
+            });
+          }
+        }) as Promise<Response>;
+      }
+    );
+
+    await expectAsync(() => client.get('/users/1', { timeoutMs: 10 })).rejects.toThrow(TimeoutError);
+  });
 });
 
 describe('HttpClient - Circuit Breaker', () => {
   let client: HttpClient;
+  let nowValue: number;
 
   beforeEach(() => {
+    nowValue = 1_000;
+    vi.spyOn(Date, 'now').mockImplementation(() => nowValue);
+
     client = new HttpClient({
       baseUrl: 'https://api.example.com',
       circuitBreaker: {
@@ -688,12 +716,12 @@ describe('HttpClient - Circuit Breaker', () => {
   });
 
   afterEach(async () => {
+    vi.restoreAllMocks();
     await client.close();
   });
-
   it('should throw CircuitOpenError when circuit open', async () => {
     // Mock fetch to fail
-    global.fetch = vi.fn().mockRejectedValue(
+    vi.spyOn(global as any, 'fetch' as any).mockRejectedValue(
       new HttpError('Server Error', { status: 500 })
     );
 
@@ -710,6 +738,73 @@ describe('HttpClient - Circuit Breaker', () => {
     expect(state).toHaveProperty('state');
     expect(state).toHaveProperty('failures');
     expect(state).toHaveProperty('failureThreshold');
+  });
+
+  it('should transition OPEN to HALF_OPEN after timeout window', async () => {
+    vi.spyOn(global as any, 'fetch' as any).mockRejectedValue(
+      new HttpError('Server Error', { status: 500 })
+    );
+
+    await expectAsync(() => client.post('/test')).rejects.toThrow(HttpError);
+    await expectAsync(() => client.post('/test')).rejects.toThrow(HttpError);
+
+    // Open timeout elapsed -> transition to HALF_OPEN, but random gate blocks this probe.
+    nowValue = 1_200;
+    vi.spyOn(Math, 'random').mockReturnValue(0.99);
+
+    await expectAsync(() => client.get('/test')).rejects.toThrow(CircuitOpenError);
+    expect(client.getCircuitBreakerState().state).toBe('HALF_OPEN');
+  });
+
+  it('should reopen circuit if HALF_OPEN probe fails', async () => {
+    vi.spyOn(global as any, 'fetch' as any).mockRejectedValue(
+      new HttpError('Server Error', { status: 500 })
+    );
+
+    await expectAsync(() => client.post('/test')).rejects.toThrow(HttpError);
+    await expectAsync(() => client.post('/test')).rejects.toThrow(HttpError);
+
+    nowValue = 1_200;
+    vi.spyOn(Math, 'random').mockReturnValue(0.0);
+
+    await expectAsync(() => client.get('/test')).rejects.toThrow(HttpError);
+    expect(client.getCircuitBreakerState().state).toBe('OPEN');
+  });
+
+  it('should close circuit if HALF_OPEN probe succeeds', async () => {
+    vi.spyOn(global, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ message: 'ok', data: { ok: true }, meta: {}, error: null }), {
+        status: 200,
+        statusText: 'OK',
+        headers: { 'content-type': 'application/json' },
+      })
+    );
+
+    // Open it first using temporary failure mock.
+    vi.spyOn(global as any, 'fetch' as any)
+      .mockRejectedValueOnce(new HttpError('Server Error', { status: 500 }))
+      .mockRejectedValueOnce(new HttpError('Server Error', { status: 500 }))
+      .mockResolvedValue(
+        new Response(JSON.stringify({ message: 'ok', data: { ok: true }, meta: {}, error: null }), {
+          status: 200,
+          statusText: 'OK',
+          headers: { 'content-type': 'application/json' },
+        })
+      );
+
+    await expectAsync(() => client.post('/test')).rejects.toThrow(HttpError);
+    await expectAsync(() => client.post('/test')).rejects.toThrow(HttpError);
+
+    nowValue = 1_200;
+    vi.spyOn(Math, 'random').mockReturnValue(0.0);
+
+    await expectAsync(() => client.get('/test')).resolves.toMatchObject({
+      message: 'ok',
+      error: null,
+    });
+
+    expect(client.getCircuitBreakerState().state).toBe('CLOSED');
+    expect(client.getCircuitBreakerState().failures).toBe(0);
   });
 });
 

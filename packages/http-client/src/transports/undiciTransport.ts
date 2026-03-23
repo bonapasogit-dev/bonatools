@@ -48,7 +48,7 @@ export class UndiciTransport implements HttpTransport {
     const result = await mod.request(request.url, {
       method: request.method,
       headers: request.headers,
-      body: request.body ? JSON.stringify(request.body) : undefined,
+      body: request.body !== undefined && request.body !== null ? JSON.stringify(request.body) : undefined,
       signal: request.signal,
       dispatcher: this.agent ?? undefined,
       headersTimeout: this.options.headersTimeout ?? request.timeoutMs,
@@ -57,7 +57,7 @@ export class UndiciTransport implements HttpTransport {
 
     return {
       status: result.statusCode,
-      statusText: String(result.statusCode),
+      statusText: '',
       headers: result.headers,
       json: () => result.body.json(),
       text: () => result.body.text(),
@@ -93,9 +93,10 @@ export class UndiciTransport implements HttpTransport {
       const mod = (await import('undici')) as unknown as UndiciModule;
       this.mod = mod;
       return mod;
-    } catch {
+    } catch (error) {
       throw new AppError('Failed to load undici transport', {
         code: 'UNDICI_NOT_AVAILABLE',
+        cause: error instanceof Error ? error : undefined,
       });
     }
   }

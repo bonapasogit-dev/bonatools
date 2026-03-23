@@ -35,7 +35,8 @@ import {
   sanitizeForLog,
   buildUrl,
 } from '../src/utils';
-import type { Logger, RequestHeaders, QueryParams } from '../src/types';
+import type { RequestHeaders, QueryParams } from '../src/types';
+import { createMockLogger } from './helpers';
 
 /** ============================================================
  *  ERROR CLASSES
@@ -272,12 +273,20 @@ describe('computeBackoff', () => {
 });
 
 describe('sleep', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('should resolve after specified milliseconds', async () => {
-    const start = Date.now();
-    await sleep(100);
-    const duration = Date.now() - start;
-    expect(duration).toBeGreaterThanOrEqual(90);
-    expect(duration).toBeLessThan(200);
+    const sleepPromise = sleep(100);
+
+    await vi.advanceTimersByTimeAsync(100);
+
+    await expect(sleepPromise).resolves.toBeUndefined();
   });
 });
 
@@ -811,15 +820,6 @@ describe('HttpClient - Circuit Breaker', () => {
 /** ============================================================
  *  TESTING UTILITIES
  *  ============================================================ */
-
-function createMockLogger(): Logger {
-  return {
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-    debug: vi.fn(),
-  };
-}
 
 function expectAsync(fn: () => Promise<any>) {
   return expect(fn());

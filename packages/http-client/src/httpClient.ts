@@ -365,7 +365,7 @@ export class HttpClient {
     timeoutMs?: number
   ): Promise<{ response: HttpSuccess<T>; statusCode: number }> {
     const controller = new AbortController();
-    let timeoutHandle: NodeJS.Timeout | null = null;
+    let timeoutHandle: ReturnType<typeof setTimeout> | null = null;
     let didTimeout = false;
 
     try {
@@ -500,7 +500,9 @@ export class HttpClient {
         throw error;
       }
 
+      const oldTransport = this.transport;
       this.transport = createTransport({ mode: 'fetch' });
+      await oldTransport.close();
 
       this.#log('warn', 'Undici unavailable, falling back to fetch transport', {
         error: errorToLogObject(error),

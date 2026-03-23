@@ -1,4 +1,4 @@
-#!/usr/bin/env -S node
+#!/usr/bin/env -S tsx
 
 import http from 'node:http';
 import process from 'node:process';

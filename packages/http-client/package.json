@@ -2,6 +2,7 @@
   "name": "@bonapasogit-dev/http-client",
   "version": "0.0.1",
   "description": "Production-grade HTTP client with circuit breaker, retries, and structured logging",
+  "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

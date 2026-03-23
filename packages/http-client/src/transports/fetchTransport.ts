@@ -15,7 +15,7 @@ export class FetchTransport implements HttpTransport {
     const response = await fetch(request.url, {
       method: request.method,
       headers: request.headers,
-      body: request.body ? JSON.stringify(request.body) : undefined,
+      body: request.body !== undefined ? JSON.stringify(request.body) : undefined,
       signal: request.signal,
     });
 

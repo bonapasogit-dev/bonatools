@@ -254,11 +254,16 @@ export function buildUrl(
   path: string,
   query?: QueryParams
 ): string {
-  // Normalize path
-  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  // Normalize path to a relative segment (no leading slash) so we don't
+  // discard any pathname present in baseUrl.
+  const relativePath = path.replace(/^\/+/, '');
+
+  // Ensure baseUrl is treated as a "directory" URL so existing path
+  // segments are preserved when appending the relative path.
+  const baseForJoin = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
 
   // Build base URL with path
-  const url = new URL(normalizedPath, baseUrl);
+  const url = new URL(relativePath, baseForJoin);
 
   // Append query parameters
   const filteredQuery = filterQuery(query);

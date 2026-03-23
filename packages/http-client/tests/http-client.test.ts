@@ -443,6 +443,16 @@ describe('buildUrl', () => {
     expect(url).not.toContain('filter');
     expect(url).not.toContain('sort');
   });
+
+  it('should preserve baseUrl path prefix', () => {
+    const url = buildUrl('https://api.example.com/v1', '/users/123');
+    expect(url).toBe('https://api.example.com/v1/users/123');
+  });
+
+  it('should preserve baseUrl path prefix with trailing slash', () => {
+    const url = buildUrl('https://api.example.com/v1/', 'users/123');
+    expect(url).toBe('https://api.example.com/v1/users/123');
+  });
 });
 
 /** ============================================================

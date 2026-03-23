@@ -511,8 +511,13 @@ src/
 
 ## Browser Compatibility
 
-Requires Node.js 18+ with native `fetch` API support.
+This client is designed to work in environments that provide the standard `fetch` API:
+- **Node.js**: Version 18+ (uses the built-in global `fetch`).
+- **Browsers**: Modern browsers that implement the Fetch API (and related primitives like `AbortController`).
+- **Other runtimes**: Any JavaScript runtime that exposes a compatible `fetch` implementation.
+
+For older environments without native `fetch`, you must provide a compatible `fetch` implementation (e.g., via a polyfill or dependency injection when constructing the client).
 
 ## License
 
-Private package - @bonapasogit-dev
+Released under the MIT License. © @bonapasogit-dev. See the root LICENSE file for full terms.

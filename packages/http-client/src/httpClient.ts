@@ -241,6 +241,18 @@ export class HttpClient {
 
     const url = buildUrl(this.baseUrl, path, options.query);
     const headers = { ...this.headers, ...(options.headers ?? {}) };
+
+    // If a body is present and no Content-Type header is set (case-insensitive),
+    // default to JSON so servers can correctly parse the payload.
+    if (body !== undefined && body !== null) {
+      const hasContentType = Object.keys(headers).some(
+        (name) => name.toLowerCase() === 'content-type'
+      );
+      if (!hasContentType) {
+        headers['Content-Type'] = 'application/json';
+      }
+    }
+
     const timeoutMs = options.timeoutMs ?? this.timeoutMs;
     const requestId = options.requestId ?? createRequestId();
     const startedAt = Date.now();
@@ -493,22 +505,33 @@ export class HttpClient {
     signal: AbortSignal;
     timeoutMs?: number;
   }) {
+    const primaryTransport = this.transport;
     try {
-      return await this.transport.send(input);
+      return await primaryTransport.send(input);
     } catch (error) {
       if (!this.shouldFallbackToFetch(error)) {
         throw error;
       }
 
-      const oldTransport = this.transport;
-      this.transport = createTransport({ mode: 'fetch' });
-      await oldTransport.close();
-
       this.#log('warn', 'Undici unavailable, falling back to fetch transport', {
         error: errorToLogObject(error),
       });
 
-      return this.transport.send(input);
+      // Replace shared transport for future requests; close old exactly once.
+      // Undici failed to load so it has no active connections - safe to close.
+      if (this.transport === primaryTransport) {
+        this.transport = createTransport({ mode: 'fetch' });
+        primaryTransport.close().catch(() => void 0);
+      }
+
+      // Use a per-request fallback transport to avoid closing one that
+      // may still be in use by concurrent in-flight requests
+      const fallbackTransport = createTransport({ mode: 'fetch' });
+      try {
+        return await fallbackTransport.send(input);
+      } finally {
+        await fallbackTransport.close();
+      }
     }
   }
 

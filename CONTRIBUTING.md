@@ -30,14 +30,14 @@ npm login
 ```bash
 git checkout main
 git pull origin main
-git checkout -b feat/<scope>-<short-description>
+git checkout -b feat/@<scope>/<short-description>
 ```
 
 Examples:
 
-- feat/responder-add-async-handler
-- fix/jwt-manager-refresh-race
-- docs/contributing-release-policy
+- feat/@bonapasogit-dev/responder-add-async-handler
+- fix/@bonapasogit-dev/jwt-manager-refresh-race
+- docs/@bonapasogit-dev/contributing-release-policy
 
 ### Step 2: Change only what is needed
 

@@ -1,11 +1,55 @@
 {
-    "name": "@bonapasogit-dev/http-client",
-    "version": "0.0.1",
-    "private": true,
-    "type": "module",
-    "scripts": {
-        "build": "echo \"no build yet\"",
-        "test": "echo \"no tests yet\"",
-        "clean": "rimraf dist"
+  "name": "@bonapasogit-dev/http-client",
+  "version": "0.0.1",
+  "description": "Production-grade HTTP client with circuit breaker, retries, and structured logging",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     }
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "benchmark": "tsx ./benchmarks/transport-benchmark.ts",
+    "benchmark:real": "tsx ./benchmarks/transport-benchmark.ts",
+    "clean": "rimraf dist",
+    "lint": "eslint src tests",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "http",
+    "client",
+    "fetch",
+    "circuit-breaker",
+    "retry",
+    "logging",
+    "typescript"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "undici": "^6.21.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0",
+    "@vitest/ui": "^1.0.0",
+    "rimraf": "^5.0.0"
+  }
 }

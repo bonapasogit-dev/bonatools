@@ -49,7 +49,16 @@
         "partukkang": "node ./packages/partukkang/dist/index.js",
         "partukkang:link": "npm run build:partukkang && npm link --workspace=@bonapasogit-dev/partukkang",
         "partukkang:install:global": "npm run build:partukkang && npm i -g ./packages/partukkang",
-        "partukkang:unlink": "npm unlink -g @bonapasogit-dev/partukkang"
+        "partukkang:unlink": "npm unlink -g @bonapasogit-dev/partukkang",
+        "build:http-client": "npx turbo run build --filter=@bonapasogit-dev/http-client",
+        "test:http-client": "npx turbo run test --filter=@bonapasogit-dev/http-client",
+        "version:http-client:patch": "npm version patch -w @bonapasogit-dev/http-client --no-git-tag-version",
+        "version:http-client:minor": "npm version minor -w @bonapasogit-dev/http-client --no-git-tag-version",
+        "version:http-client:major": "npm version major -w @bonapasogit-dev/http-client --no-git-tag-version",
+        "publish:http-client": "npm publish -w @bonapasogit-dev/http-client --access public",
+        "release:http-client:patch": "npm run build:http-client && npm run version:http-client:patch && npm run publish:http-client",
+        "release:http-client:minor": "npm run build:http-client && npm run version:http-client:minor && npm run publish:http-client",
+        "release:http-client:major": "npm run build:http-client && npm run version:http-client:major && npm run publish:http-client"
     },
     "devDependencies": {
         "@eslint/js": "^9.22.0",

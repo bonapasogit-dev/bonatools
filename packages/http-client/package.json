@@ -6,6 +6,12 @@
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "repository": {
+      "type": "git",
+      "url": "git+https://github.com/bonapasogit-dev/bonatools.git",
+      "directory": "packages/http-client"
+  },
+  "homepage": "https://github.com/bonapasogit-dev/bonatools/tree/main/packages/http-client#readme",
   "files": [
     "dist",
     "src",

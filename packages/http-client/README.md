@@ -160,6 +160,10 @@ Principle benchmark guidance:
 - For Node service-to-service traffic, `undici` or `auto` is usually best.
 - For browser compatibility and universal code paths, keep `auto` as default.
 
+Benchmark result fetch & undici with 50 connections, 100 request and 10 pipelining:
+
+<img width="2048" height="1210" alt="image" src="https://github.com/user-attachments/assets/1e59d974-f1f0-48c7-a77c-0864195d990b" />
+
 ### Circuit Breaker Configuration
 
 ```typescript
